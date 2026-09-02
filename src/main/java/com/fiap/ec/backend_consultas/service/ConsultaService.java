@@ -1,7 +1,10 @@
 package com.fiap.ec.backend_consultas.service;
 
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+
+import com.fiap.ec.backend_consultas.exception.RecursoNaoEncontradoException;
 import com.fiap.ec.backend_consultas.model.Consulta;
 import com.fiap.ec.backend_consultas.model.Medico;
 import com.fiap.ec.backend_consultas.model.Paciente;
@@ -30,41 +33,43 @@ public class ConsultaService {
 
     public Consulta buscarPorId(Long id) {
         return consultaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Consulta não encontrada"));
     }
 
     public Consulta salvar(Consulta consulta) {
         Medico medico = medicoRepository.findById(consulta.getMedico().getId())
-                .orElseThrow(() -> new RuntimeException("Médico não encontrado"));
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Médico não encontrado"));
         Paciente paciente = pacienteRepository.findById(consulta.getPaciente().getId())
-                .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
+
         consulta.setMedico(medico);
         consulta.setPaciente(paciente);
+
         return consultaRepository.save(consulta);
     }
 
     public Consulta atualizar(Long id, Consulta consultaAtualizada) {
         Consulta consultaExistente = buscarPorId(id);
-        if (consultaAtualizada.getDataHora() != null) {
+
+        if (consultaAtualizada.getDataHora() != null)
             consultaExistente.setDataHora(consultaAtualizada.getDataHora());
-        }
-        if (consultaAtualizada.getStatus() != null) {
+        if (consultaAtualizada.getStatus() != null)
             consultaExistente.setStatus(consultaAtualizada.getStatus());
-        }
-        if (consultaAtualizada.getValor() != null) {
+        if (consultaAtualizada.getValor() != null)
             consultaExistente.setValor(consultaAtualizada.getValor());
-        }
         consultaExistente.setObservacoes(consultaAtualizada.getObservacoes());
+
         if (consultaAtualizada.getMedico() != null && consultaAtualizada.getMedico().getId() != null) {
             Medico medico = medicoRepository.findById(consultaAtualizada.getMedico().getId())
-                    .orElseThrow(() -> new RuntimeException("Médico não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Médico não encontrado"));
             consultaExistente.setMedico(medico);
         }
         if (consultaAtualizada.getPaciente() != null && consultaAtualizada.getPaciente().getId() != null) {
             Paciente paciente = pacienteRepository.findById(consultaAtualizada.getPaciente().getId())
-                    .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
             consultaExistente.setPaciente(paciente);
         }
+
         return consultaRepository.save(consultaExistente);
     }
 
